@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "725567849107",
+    "project_id": "leboncoin-2bd13",
+    "storage_bucket": "leboncoin-2bd13.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:725567849107:android:0bb864be4b7aef672bc366",
+        "android_client_info": {
+          "package_name": "com.example.leboncoin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "725567849107-c30mpdv769iuh761f9la233pudh5lfp9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCbN3F9Sz9nR6BNiPRQZTkFU-WKyiiEyE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "725567849107-c30mpdv769iuh761f9la233pudh5lfp9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
