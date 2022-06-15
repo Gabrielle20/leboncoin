@@ -29,6 +29,13 @@
             {
               "client_id": "725567849107-c30mpdv769iuh761f9la233pudh5lfp9.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "725567849107-c9qifigq9juomqs3i77q6qd4pe3rnp3o.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.leboncoin"
+              }
             }
           ]
         }

@@ -215,8 +215,6 @@ MyPopUp(){
                       };
                       FirestoreHelper().updateUser(GlobalUser.id, map);
 
-
-
                       Navigator.pop(context);
                     });
                   },
