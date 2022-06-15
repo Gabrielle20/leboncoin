@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:leboncoin/Services/FirestoreHelper.dart';
+import 'package:leboncoin/View/dashBoard.dart';
+import 'package:leboncoin/Services/global.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,68 +57,214 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  String mail = "";
+  String password = "";
+  String prenom = "";
+  String nom = "";
+  DateTime birthday = DateTime.now();
+  bool isregister = true;
+  String nomVariable = "Inscription";
+  List<bool> selection = [true, false];
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
+
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      body: Padding(
+        child : bodyPage(),
+        padding : const EdgeInsets.all(10),
+
+      )
     );
   }
+
+
+
+  Widget bodyPage() {
+    return SingleChildScrollView(
+      child: Column(
+        children : [
+          // Logo
+          Container(
+            height : 80,
+            decoration : const BoxDecoration(
+                shape : BoxShape.circle,
+                image : DecorationImage(
+                    image : NetworkImage("https://medias.pourlascience.fr/api/v1/images/view/5d1b663a8fe56f77c8671165/wide_1300/image.jpg"),
+                    fit : BoxFit.fill
+
+                )
+            ),
+          ),
+
+
+
+          const SizedBox(height:10),
+          // Choix pour l'utilisateur
+          ToggleButtons(
+            children:const [
+              Text("Inscription"),
+              Text("Connexion")
+            ],
+            isSelected: selection,
+            onPressed: (index) {
+              if (index == 0) {
+                setState(() {
+                  selection[0] = true;
+                  selection[1] = false;
+                  isregister = true;
+                });
+              }
+              else {
+                setState(() {
+                  selection[0] = false;
+                  selection[1] = true;
+                  isregister = false;
+                });
+              }
+            },
+          ),
+
+
+          // Afficher le nom suivant les différents cas (inscription ou connexion)
+          const SizedBox(height: 10),
+          (isregister) ? TextField(
+              decoration : InputDecoration(
+                  hintText : "Entrer votre nom",
+                  icon : const Icon(Icons.person),
+                  border : OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20)
+                  )
+              ),
+              onChanged : (String value){
+                setState((){
+                  nom = value;
+                });
+
+              }
+
+          ): Container(),
+
+
+          const SizedBox(height: 10),
+          (isregister) ? TextField(
+              decoration : InputDecoration(
+                  hintText : "Entrer votre prenom",
+                  icon : const Icon(Icons.person),
+                  border : OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20)
+                  )
+              ),
+              onChanged : (String value){
+                setState((){
+                  prenom = value;
+                });
+
+              }
+
+          ): Container(),
+
+          //Champs adresse mail
+          const SizedBox(height : 10),
+
+          TextField(
+              decoration : InputDecoration(
+                  hintText : "Entrer votre adresse mail",
+                  icon : const Icon(Icons.mail),
+                  border : OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20)
+                  )
+              ),
+              onChanged : (String value){
+                setState((){
+                  mail = value;
+                });
+              }
+
+          ),
+
+
+          //champs mot de passe
+          const SizedBox(height : 10),
+          TextField(
+              obscureText : true,
+              decoration : InputDecoration(
+                hintText : "Entrer votre mot de passe",
+                icon : const Icon(Icons.lock),
+                border : OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20)
+                ),
+
+              ),
+              onChanged : (value){
+                setState((){
+                  password = value;
+                });
+              }
+
+
+          ),
+
+
+
+          //Bouton
+          const SizedBox(height : 10),
+
+          ElevatedButton(
+              onPressed : () {
+                if (isregister == true) {
+                  // fonction pour s'inscrire
+                  inscription();
+                }
+                else {
+                  // fonction pour se connecter
+                  connexion();
+                }
+              },
+              child : const Text("Validation")
+
+          )
+
+
+        ],
+      ),
+    );
+  }
+
+
+
+
+  // Fonction
+  inscription() {
+    FirestoreHelper().createUser(nom, birthday, password, mail, prenom).then((value){
+      Navigator.push(context, MaterialPageRoute(builder: (context) {
+        return dashBoard();
+      }));
+    }).catchError((error) {
+      // par exemple une perte de connexion qui va planter la création du compte
+      print(error);
+    });
+  }
+
+
+  connexion() {
+    FirestoreHelper().connectUser(mail, password).then((value) {
+      setState(() {
+        GlobalUser = value;
+      });
+
+      Navigator.push(context, MaterialPageRoute(builder: (context) {
+        return dashBoard();
+      }));
+    }).catchError((error){
+      // afficher popup connexion échouée
+      print(error);
+    });
+  }
+
+
 }
