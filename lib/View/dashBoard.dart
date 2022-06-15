@@ -1,4 +1,3 @@
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:leboncoin/Services/FirestoreAnnouncesHelper.dart';
@@ -19,7 +18,7 @@ class dashboardState extends State<dashBoard>{
   String urlPicture = "";
   String userId = GlobalUser.id;
 
-  var isNewAnnounce;
+  var listAnnoucesByUser = null;
   String state = "list";
   bool occass = true;
 
@@ -29,8 +28,6 @@ class dashboardState extends State<dashBoard>{
         state = "addNew";
       });
     }
-
-
   }
 
   @override
@@ -43,7 +40,7 @@ class dashboardState extends State<dashBoard>{
         child: MyDrawer()
       ),
       appBar : AppBar(
-        title : const Text("Ma deuxième page"),
+        title : const Text("Mon profil"),
         backgroundColor: Colors.green,
       ),
       backgroundColor: Colors.yellow,
@@ -60,21 +57,68 @@ class dashboardState extends State<dashBoard>{
   }
 
   Widget displayAnnounces(){
-    getAnnouncesByUser();
-    return (state == "addNew") ? addNewAnnounce() :  Scaffold(
-        body: Center(
-          // Center is a layout widget. It takes a single child and positions it
-          // in the middle of the parent.
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                'You have pushed the button this many times:',
+    if(state != "addNew"){
+      getAnnouncesByUser();
+    }
+    return (state == "addNew") ? addNewAnnounce() :  SingleChildScrollView(
+        child:  Column(
+            children: <Widget> [
+            Table(
+            border: TableBorder.symmetric(
+              outside: BorderSide.none,
+              inside: const BorderSide(width: 1, color: Colors.grey, style: BorderStyle.solid),
+            ),
+            columnWidths: {
+            },
+            children: [
+                for(var announce in listAnnoucesByUser) TableRow(children: [
+              Card(
+                clipBehavior: Clip.antiAlias,
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: Icon(Icons.arrow_drop_down_circle),
+                      title: Text(announce["titre"]),
+                      subtitle: Text(
+                        "de Moi",
+                        style: TextStyle(color: Colors.black.withOpacity(0.6)),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        announce["contenu"],
+                        style: TextStyle(color: Colors.black.withOpacity(0.6)),
+                      ),
+                    ),
+                    Image.network(announce["urlPicture"]),
+                    ButtonBar(
+                      alignment: MainAxisAlignment.start,
+                      children: [
+                        FlatButton(
+                          textColor: const Color(0xFF6200EE),
+                          onPressed: () {
+                            // Perform some action
+                          },
+                          child: const Text('Modifier mon annonce'),
+                        ),
+                        FlatButton(
+                          textColor: const Color(0xFFEE0000),
+                          onPressed: () {
+                            // Perform some action
+                          },
+                          child: const Text('Supprimer mon annonce'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
+            ])
             ],
-          ),
-        )
-    );
+
+            )]),
+        );
   }
 
   Widget addNewAnnounce(){
@@ -183,6 +227,10 @@ class dashboardState extends State<dashBoard>{
   }
 
   getAnnouncesByUser(){
-    FirestoreAnnounceHelper().getStreamAnnouncesByUser();
+    FirestoreAnnounceHelper().getStreamAnnouncesByUser().then((result) => {
+      setState((){
+        listAnnoucesByUser = result;
+      })
+    });
   }
 }

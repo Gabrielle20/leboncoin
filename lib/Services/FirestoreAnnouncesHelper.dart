@@ -1,4 +1,6 @@
 
+import 'dart:convert';
+import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -33,16 +35,23 @@ class FirestoreAnnounceHelper{
   }
 
   getStreamAnnouncesByUser() async{
-     var annoucesByUser = await fire_announce.where("USERID", isEqualTo: GlobalUser.id).get().then(
+    var annoucesByUser = await fire_announce.where("USERID", isEqualTo: GlobalUser.id).get().then(
       (QuerySnapshot querySnapshot) {
         if(querySnapshot != null){
-          return querySnapshot;
-
-          /*querySnapshot.docs.forEach((doc) {
-            print(doc["first_name"]);
-          });*/
+          List listAnnounces = [];
+          querySnapshot.docs.forEach((doc) {
+           var rawData = {
+              "id" : doc.id,
+              "titre" : doc["TITRE"],
+              "contenu" : doc["CONTENU"],
+              "urlPicture" : (doc["URLPICTURE"] == null) ? doc["URLPICTURE"] : "https://letetris.fr/sites/default/files/letetris/styles/galerie_photos/public/ged/dsc03041_cmarius_gonzales.jpg?itok=jorASQl4"
+            };
+            listAnnounces.add(rawData);
+          });
+          return listAnnounces;
         }
       });
+     return annoucesByUser;
   }
 
   addAnnounce(Map<String,dynamic> map){
