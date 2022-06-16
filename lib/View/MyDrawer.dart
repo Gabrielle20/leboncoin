@@ -103,11 +103,9 @@ class MyDrawerState extends  State<MyDrawer>{
                 ElevatedButton.icon(
                     onPressed: (){
 
-                      // link to favoris
-
-                      // Navigator.push(context, MaterialPageRoute(builder: (context) {
-                      //   return account();
-                      // }));
+                      Navigator.push(context, MaterialPageRoute(builder: (context) {
+                        return account();
+                      }));
                     },
                     icon: const Icon(Icons.heart_broken),
                     label: const Text("Mes Favoris"),
