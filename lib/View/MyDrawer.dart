@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:leboncoin/Services/FirestoreHelper.dart';
 import 'package:leboncoin/Services/global.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:leboncoin/View/Annonces/AnnounceByUser.dart';
+import 'package:leboncoin/View/dashBoard.dart';
 
 class MyDrawer extends StatefulWidget{
   @override
@@ -27,8 +29,8 @@ class MyDrawerState extends  State<MyDrawer>{
   Widget build(BuildContext context) {
     return SafeArea(
         child: Container(
-          padding: EdgeInsets.all(20),
-          child:  Center(
+          child:  Align(
+            alignment: Alignment.center,
             child: Column(
               children: [
                 //Avatar cliquable
@@ -56,7 +58,6 @@ class MyDrawerState extends  State<MyDrawer>{
 
                 //Pseudo qui pourra changer
                TextButton.icon(
-
                    onPressed: (){
 
                      if (isEditing == true){
@@ -91,7 +92,6 @@ class MyDrawerState extends  State<MyDrawer>{
 
 
 
-
                 // nom et prénom complet
                 Text(GlobalUser.nomComplet()),
 
@@ -106,15 +106,29 @@ class MyDrawerState extends  State<MyDrawer>{
                     },
                     icon: const Icon(Icons.exit_to_app_sharp),
                     label: const Text("Fermer")
-                )
-
-
-
-
+                ),
+                ElevatedButton.icon(
+                    onPressed: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) {
+                        return dashBoard();
+                      }));
+                    },
+                    icon: const Icon(Icons.my_library_books),
+                    label: const Text("Toutes les annonces"),
+                ),
+                ElevatedButton.icon(
+                    onPressed: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) {
+                        return announceByUser();
+                      }));
+                    },
+                    icon: const Icon(Icons.my_library_books_outlined),
+                    label: const Text("Mes annonces"),
+                ),
               ],
             ),
           ),
-        )
+        ),
     );
 
   }
@@ -214,8 +228,6 @@ MyPopUp(){
                         "AVATAR":urlImage
                       };
                       FirestoreHelper().updateUser(GlobalUser.id, map);
-
-
 
                       Navigator.pop(context);
                     });
