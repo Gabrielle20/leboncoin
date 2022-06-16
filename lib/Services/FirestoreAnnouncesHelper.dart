@@ -66,7 +66,7 @@ class FirestoreAnnounceHelper{
   }
 
   getStreamAllAnnounce() async{
-    var annoucesByUser = await fire_announce.orderBy("CREATEDAT", descending: false).get().then(
+    var annoucesByUser = await fire_announce.orderBy("CREATEDAT", descending: true).get().then(
             (QuerySnapshot querySnapshot) {
           if(querySnapshot != null){
             List listAnnounces = [];
