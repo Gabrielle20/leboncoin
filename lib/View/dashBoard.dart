@@ -47,9 +47,8 @@ class dashboardState extends State<dashBoard>{
       ),
       appBar : AppBar(
         title : const Text("Listes des annonces"),
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.blue,
       ),
-      backgroundColor: Colors.yellow,
       body : Padding(
         padding: EdgeInsets.all(20),
         child: displayAnnounces()
