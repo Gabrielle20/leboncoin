@@ -24,6 +24,7 @@ class FirestoreAnnounceHelper{
       "CONTENU" : contenu,
       "URLPICTURE" : urlPicture,
       "USERID" : GlobalUser.id,
+      "CREATEDAT": DateTime.now()
     };
     addAnnounce(map);
 
@@ -35,16 +36,21 @@ class FirestoreAnnounceHelper{
   }
 
   getStreamAnnouncesByUser() async{
-    var annoucesByUser = await fire_announce.where("USERID", isEqualTo: GlobalUser.id).get().then(
+    var annoucesByUser = await fire_announce.where("USERID", isEqualTo: GlobalUser.id).orderBy("CREATEDAT", descending: false).get().then(
       (QuerySnapshot querySnapshot) {
         if(querySnapshot != null){
           List listAnnounces = [];
           querySnapshot.docs.forEach((doc) {
+            var urlPicture = doc["URLPICTURE"];
+            if(urlPicture == ""){
+              urlPicture = "https://letetris.fr/sites/default/files/letetris/styles/galerie_photos/public/ged/dsc03041_cmarius_gonzales.jpg?itok=jorASQl4";
+            }
            var rawData = {
               "id" : doc.id,
               "titre" : doc["TITRE"],
               "contenu" : doc["CONTENU"],
-              "urlPicture" : (doc["URLPICTURE"] == null) ? doc["URLPICTURE"] : "https://letetris.fr/sites/default/files/letetris/styles/galerie_photos/public/ged/dsc03041_cmarius_gonzales.jpg?itok=jorASQl4"
+              "urlPicture" : urlPicture,
+              "created_at" : (doc["CREATEDAT"] as Timestamp).toDate()
             };
             listAnnounces.add(rawData);
           });
@@ -58,8 +64,12 @@ class FirestoreAnnounceHelper{
     fire_announce.doc().set(map);
   }
 
-  updateAnnounce(String uid , Map<String,dynamic> map){
-    fire_announce.doc(uid).update(map);
+  updateAnnounce(String uid , Map<String,dynamic> map) async{
+    return await fire_announce.doc(uid).update(map);
+  }
+
+  deleteAnnounce(String uid) async{
+    return await fire_announce.doc(uid).delete();
   }
 
   /*Future stockageImage(Uint8List bytes, String name) async {

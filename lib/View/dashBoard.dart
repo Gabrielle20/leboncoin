@@ -16,11 +16,12 @@ class dashboardState extends State<dashBoard>{
   String titre = "";
   String contenu = "";
   String urlPicture = "";
+  String idAnnounce = "";
   String userId = GlobalUser.id;
 
   var listAnnoucesByUser = null;
   String state = "list";
-  bool occass = true;
+  var isEditing = false;
 
   void _setIsNewAnnouce(){
     if(state == "list"){
@@ -80,7 +81,7 @@ class dashboardState extends State<dashBoard>{
                       leading: Icon(Icons.arrow_drop_down_circle),
                       title: Text(announce["titre"]),
                       subtitle: Text(
-                        "de Moi",
+                        "de Moi le ${announce["created_at"]}",
                         style: TextStyle(color: Colors.black.withOpacity(0.6)),
                       ),
                     ),
@@ -98,6 +99,14 @@ class dashboardState extends State<dashBoard>{
                         FlatButton(
                           textColor: const Color(0xFF6200EE),
                           onPressed: () {
+                            setState(() {
+                              state = "addNew";
+                              titre = announce["titre"];
+                              contenu = announce["contenu"];
+                              urlPicture = announce["urlPicture"];
+                              idAnnounce = announce["id"];
+                              isEditing =  true;
+                            });
                             // Perform some action
                           },
                           child: const Text('Modifier mon annonce'),
@@ -105,7 +114,8 @@ class dashboardState extends State<dashBoard>{
                         FlatButton(
                           textColor: const Color(0xFFEE0000),
                           onPressed: () {
-                            // Perform some action
+                            idAnnounce = announce["id"];
+                            _showMyDialog();
                           },
                           child: const Text('Supprimer mon annonce'),
                         ),
@@ -127,13 +137,14 @@ class dashboardState extends State<dashBoard>{
         children: [
           const SizedBox(height : 10),
 
-          TextField(
+          TextFormField(
               decoration : InputDecoration(
                   hintText : "Entrer votre Titre",
                   border : OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20)
                   )
               ),
+              initialValue: titre,
               onChanged : (String value){
                 setState((){
                   titre = value;
@@ -143,13 +154,14 @@ class dashboardState extends State<dashBoard>{
           ),
           const SizedBox(height : 10),
 
-          TextField(
+          TextFormField(
               decoration : InputDecoration(
                   hintText : "Entrer votre Contenu",
                   border : OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20)
                   )
               ),
+              initialValue: contenu,
               onChanged : (String value){
                 setState((){
                   contenu = value;
@@ -159,13 +171,14 @@ class dashboardState extends State<dashBoard>{
           ),
           const SizedBox(height : 10),
 
-          TextField(
+          TextFormField(
               decoration : InputDecoration(
                   hintText : "L'url de votre image",
                   border : OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20)
                   )
               ),
+              initialValue: urlPicture,
               onChanged : (String value){
                 setState((){
                   urlPicture = value;
@@ -181,7 +194,11 @@ class dashboardState extends State<dashBoard>{
                 child:
                   ElevatedButton(
                       onPressed : () {
-                        newAnnounce();
+                        if(isEditing == false){
+                          newAnnounce();
+                        }else{
+                          editAnnounce();
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.symmetric(horizontal: 20)
@@ -216,6 +233,9 @@ class dashboardState extends State<dashBoard>{
     FirestoreAnnounceHelper().createAnnounce(titre, contenu, userId, urlPicture).then((value) =>
         setState(() {
           state = "list";
+          titre = "";
+          contenu = "";
+          urlPicture = "";
         })
     ).catchError((error) => print(error));
   }
@@ -223,6 +243,10 @@ class dashboardState extends State<dashBoard>{
   cancelNew(){
     setState(() {
       state = "list";
+      state = "list";
+      titre = "";
+      contenu = "";
+      urlPicture = "";
     });
   }
 
@@ -232,5 +256,62 @@ class dashboardState extends State<dashBoard>{
         listAnnoucesByUser = result;
       })
     });
+  }
+  editAnnounce(){
+    Map<String,dynamic> map = {
+      "TITRE": titre,
+      "CONTENU" : contenu,
+      "URLPICTURE" : urlPicture,
+      "USERID" : GlobalUser.id,
+    };
+    FirestoreAnnounceHelper().updateAnnounce(idAnnounce, map).then((result) => {
+      setState(() {
+        state = "list";
+        titre = "";
+        contenu = "";
+        urlPicture = "";
+      })
+    });
+  }
+  deleteAnnounce(){
+    FirestoreAnnounceHelper().deleteAnnounce(idAnnounce).then((result) => {
+      setState((){
+        state = "list";
+      })
+    });
+  }
+
+  Future<void> _showMyDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Êtes vous sur de supprimer cette annonce ?'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: const <Widget>[
+                Text('This is a demo alert dialog.'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Supprimer'),
+              onPressed: () {
+                deleteAnnounce();
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Annuler'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }

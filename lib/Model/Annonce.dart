@@ -29,5 +29,7 @@ class Annonce {
       {
         pictureUrl = urlPicture;
       }
+      Timestamp timestamp = map["CREATEDAT"];
+      createdAt = timestamp.toDate();
     }
   }
