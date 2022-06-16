@@ -46,10 +46,14 @@ class dashboardState extends State<dashBoard>{
         child: MyDrawer()
       ),
       appBar : AppBar(
+        title : const Text("Ma deuxième page"),
         title : const Text("Listes des annonces"),
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.blue,
       ),
-      backgroundColor: Colors.yellow,
+      body : Center(
+          child : Text("${GlobalUser.id}")
+      body : Center(
+          child : Text("${GlobalUser.id}")
       body : Padding(
         padding: EdgeInsets.all(20),
         child: displayAnnounces()

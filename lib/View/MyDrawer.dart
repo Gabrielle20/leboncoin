@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:leboncoin/Services/FirestoreHelper.dart';
 import 'package:leboncoin/Services/global.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:leboncoin/View/account.dart';
 import 'package:leboncoin/View/Annonces/AnnounceByUser.dart';
 import 'package:leboncoin/View/dashBoard.dart';
 
@@ -14,6 +15,8 @@ class MyDrawer extends StatefulWidget{
   State<StatefulWidget> createState() {
     return MyDrawerState();
   }
+
+  void pickImage() {}
 
 }
 
@@ -52,6 +55,10 @@ class MyDrawerState extends  State<MyDrawer>{
                   },
                 ),
                 SizedBox(height: 10,),
+
+
+
+
 
 
 
@@ -99,7 +106,36 @@ class MyDrawerState extends  State<MyDrawer>{
                 // adresee mail
                 Text(GlobalUser.mail),
 
+                SizedBox(height: 5),
+                ElevatedButton.icon(
+                    onPressed: (){
 
+                      // link to favoris
+
+                      // Navigator.push(context, MaterialPageRoute(builder: (context) {
+                      //   return account();
+                      // }));
+                    },
+                    icon: const Icon(Icons.heart_broken),
+                    label: const Text("Mes Favoris"),
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
+                    ),
+                ),
+
+
+                SizedBox(height: 5),
+                ElevatedButton.icon(
+                    onPressed: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) {
+                        return account();
+                      }));
+                    },
+                    icon: const Icon(Icons.home),
+                    label: const Text("Mon Compte")
+                ),
+
+                SizedBox(height: 5),
                 ElevatedButton.icon(
                     onPressed: (){
                       Navigator.pop(context);
@@ -153,74 +189,85 @@ class MyDrawerState extends  State<MyDrawer>{
   }
   
   //Création de notre popUp
-MyPopUp(){
-    showDialog(
-        barrierDismissible: false,
-        context: context,
-        builder: (context){
-          if(Platform.isIOS){
-            return CupertinoAlertDialog(
-              title: const Text("Mon image"),
-              content: Image.memory(bytesImage!),
-              actions: [
-                ElevatedButton(
+  MyPopUp(){
+      showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (context){
+            if(Platform.isIOS){
+              return CupertinoAlertDialog(
+                title: const Text("Mon image"),
+                content: Image.memory(bytesImage!),
+                actions: [
+                  ElevatedButton(
+                      onPressed: (){
+                        Navigator.pop(context);
+                      }, 
+                      child: const Text("Annuler"),
+                  ),
+
+                  ElevatedButton(
+                    onPressed: (){
+                      //Stocker et on va récupérer son url
+                      FirestoreHelper().stockageImage(bytesImage!, nomImage!).then((value){
+                        setState(() {
+                          GlobalUser.avatar = value;
+                          urlImage = value;
+                        });
+                        //Mettre à jour notre base de donnée en stockant l'url
+                        Map<String,dynamic> map ={
+                          //Key : Valeur
+                          "AVATAR":urlImage
+                        };
+                        FirestoreHelper().updateUser(GlobalUser.id, map);
+
+
+
+                        Navigator.pop(context);
+                      });
+
+
+
+
+
+
+
+                    },
+                    child: const Text("Enregistrement"),
+                  ),
+                ],
+              );
+            }
+            else {
+              return AlertDialog(
+                title: const Text("Mon image"),
+                content: Image.memory(bytesImage!),
+                actions: [
+                  ElevatedButton(
                     onPressed: (){
                       Navigator.pop(context);
-                    }, 
+                    },
                     child: const Text("Annuler"),
-                ),
+                  ),
 
-                ElevatedButton(
-                  onPressed: (){
-                    //Stocker et on va récupérer son url
-                    FirestoreHelper().stockageImage(bytesImage!, nomImage!).then((value){
-                      setState(() {
-                        GlobalUser.avatar = value;
-                        urlImage = value;
-                      });
-                      //Mettre à jour notre base de donnée en stockant l'url
-                      Map<String,dynamic> map ={
-                        //Key : Valeur
-                        "AVATAR":urlImage
-                      };
-                      FirestoreHelper().updateUser(GlobalUser.id, map);
-
-
-
-                      Navigator.pop(context);
-                    });
+                  ElevatedButton(
+                    onPressed: (){
+                      //Stocker et on va récupérer son url
+                      FirestoreHelper().stockageImage(bytesImage!, nomImage!).then((value){
+                        setState(() {
+                          GlobalUser.avatar = value;
+                          urlImage = value;
+                        });
+                        //Mettre à jour notre base de donnée en stockant l'url
+                        Map<String,dynamic> map ={
+                          //Key : Valeur
+                          "AVATAR":urlImage
+                        };
+                        FirestoreHelper().updateUser(GlobalUser.id, map);
 
 
 
-
-
-
-
-                  },
-                  child: const Text("Enregistrement"),
-                ),
-              ],
-            );
-          }
-          else {
-            return AlertDialog(
-              title: const Text("Mon image"),
-              content: Image.memory(bytesImage!),
-              actions: [
-                ElevatedButton(
-                  onPressed: (){
-                    Navigator.pop(context);
-                  },
-                  child: const Text("Annuler"),
-                ),
-
-                ElevatedButton(
-                  onPressed: (){
-                    //Stocker et on va récupérer son url
-                    FirestoreHelper().stockageImage(bytesImage!, nomImage!).then((value){
-                      setState(() {
-                        GlobalUser.avatar = value;
-                        urlImage = value;
+                        Navigator.pop(context);
                       });
                       //Mettre à jour notre base de donnée en stockant l'url
                       Map<String,dynamic> map ={
@@ -237,10 +284,16 @@ MyPopUp(){
               ],
               
             );
+                    },
+                    child: const Text("Enregistrement"),
+                  ),
+                ],
+                
+              );
+            }
           }
-        }
-    );
-}
+      );
+  }
 
 
 
