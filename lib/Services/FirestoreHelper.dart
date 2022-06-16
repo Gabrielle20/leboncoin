@@ -5,19 +5,36 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:leboncoin/Model/Utilisateur.dart';
+import 'package:leboncoin/Services/global.dart';
+import 'package:random_string/random_string.dart';
+import 'dart:math' show Random;
 
 class FirestoreHelper{
 
   //Attributs
    final auth = FirebaseAuth.instance;
    final fire_users = FirebaseFirestore.instance.collection("Utilisateurs");
+   final fire_fav = FirebaseFirestore.instance.collection("Favoris");
    final storage = FirebaseStorage.instance;
 
 
-
-
-
    //Méthodes
+
+   Future createFavoris(String annonceId) async {
+      String uid_principal = randomNumeric(20);
+       Map<String,dynamic> map = {
+        "id": uid_principal, 
+        "userId": GlobalUser.id,
+        "annonceId" : annonceId,
+       };
+       addFavoris(uid_principal, map);
+
+    }
+
+    addFavoris(String userId, Map<String,dynamic> map){
+       fire_fav.doc().set(map);
+    }
+
     Future createUser(String nom, DateTime birthday, String password, String mail, String prenom) async {
        UserCredential resultat = await auth.createUserWithEmailAndPassword(email: mail, password: password);
        User userFirebase = resultat.user!;

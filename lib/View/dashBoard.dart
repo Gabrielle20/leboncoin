@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:leboncoin/Services/FirestoreAnnouncesHelper.dart';
 import 'package:leboncoin/Services/librairie.dart';
+import 'package:leboncoin/Services/FirestoreHelper.dart';
 import 'package:leboncoin/View/MyDrawer.dart';
 
 class dashBoard extends StatefulWidget {
@@ -101,7 +102,7 @@ class dashboardState extends State<dashBoard>{
                             child: IconButton(
                               icon: const Icon(Icons.favorite_border_rounded),
                               color: Colors.white,
-                              onPressed: () {},
+                              onPressed: () {createFav();},
                             ),
                           ),
                         ],
@@ -222,6 +223,17 @@ class dashboardState extends State<dashBoard>{
     );
   }
 
+createFav(){
+    FirestoreHelper().createFavoris("test").then((value) {
+
+          Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return dashBoard();
+          }));
+        }).catchError((error){
+          // afficher popup connexion échouée
+          print(error);
+        });
+  }
 
   newAnnounce(){
     FirestoreAnnounceHelper().createAnnounce(titre, contenu, userId, urlPicture).then((value) =>
