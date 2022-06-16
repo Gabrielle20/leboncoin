@@ -1,4 +1,5 @@
-
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:leboncoin/Services/FirestoreAnnouncesHelper.dart';
 import 'package:leboncoin/Services/librairie.dart';
@@ -19,7 +20,11 @@ class dashboardState extends State<dashBoard>{
   String idAnnounce = "";
   String userId = GlobalUser.id;
 
+
   var listAnnoucesByUser = null;
+  var bytesImage;
+  var nomImage;
+
   String state = "list";
   var isEditing = false;
 
@@ -41,7 +46,7 @@ class dashboardState extends State<dashBoard>{
         child: MyDrawer()
       ),
       appBar : AppBar(
-        title : const Text("Mon profil"),
+        title : const Text("Listes des annonces"),
         backgroundColor: Colors.green,
       ),
       backgroundColor: Colors.yellow,
@@ -59,7 +64,7 @@ class dashboardState extends State<dashBoard>{
 
   Widget displayAnnounces(){
     if(state != "addNew"){
-      getAnnouncesByUser();
+      getAllAnnounces();
     }
     return (state == "addNew") ? addNewAnnounce() :  SingleChildScrollView(
         child:  Column(
@@ -80,11 +85,30 @@ class dashboardState extends State<dashBoard>{
                     ListTile(
                       leading: Icon(Icons.arrow_drop_down_circle),
                       title: Text(announce["titre"]),
-                      subtitle: Text(
-                        "de Moi le ${announce["created_at"]}",
-                        style: TextStyle(color: Colors.black.withOpacity(0.6)),
-                      ),
+                      subtitle: Row(
+                        children: <Widget>[
+                          Padding(
+                            padding: EdgeInsets.only(right: 5),
+                            child: (
+                                Text("de Anonyme le ${announce["created_at"]}",
+                                  style: TextStyle(color: Colors.black.withOpacity(0.6)),)
+                            )
+                          ),
+                          Ink(
+                            decoration: const ShapeDecoration(
+                              color: Colors.lightBlue,
+                              shape: CircleBorder(),
+                            ),
+                            child: IconButton(
+                              icon: const Icon(Icons.favorite_border_rounded),
+                              color: Colors.white,
+                              onPressed: () {},
+                            ),
+                          ),
+                        ],
+                      )
                     ),
+
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
@@ -93,34 +117,6 @@ class dashboardState extends State<dashBoard>{
                       ),
                     ),
                     Image.network(announce["urlPicture"]),
-                    ButtonBar(
-                      alignment: MainAxisAlignment.start,
-                      children: [
-                        FlatButton(
-                          textColor: const Color(0xFF6200EE),
-                          onPressed: () {
-                            setState(() {
-                              state = "addNew";
-                              titre = announce["titre"];
-                              contenu = announce["contenu"];
-                              urlPicture = announce["urlPicture"];
-                              idAnnounce = announce["id"];
-                              isEditing =  true;
-                            });
-                            // Perform some action
-                          },
-                          child: const Text('Modifier mon annonce'),
-                        ),
-                        FlatButton(
-                          textColor: const Color(0xFFEE0000),
-                          onPressed: () {
-                            idAnnounce = announce["id"];
-                            _showMyDialog();
-                          },
-                          child: const Text('Supprimer mon annonce'),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),
@@ -169,23 +165,26 @@ class dashboardState extends State<dashBoard>{
               }
 
           ),
-          const SizedBox(height : 10),
+          const SizedBox(height : 20),
 
-          TextFormField(
-              decoration : InputDecoration(
-                  hintText : "L'url de votre image",
-                  border : OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20)
-                  )
+
+          InkWell(
+            child: Container(
+              height: 100,
+              decoration: BoxDecoration(
+                shape: BoxShape.rectangle,
+                image: DecorationImage(
+                    image: NetworkImage((urlPicture == "") ? "https://immo-fonctionnaire.fr/_nuxt/img/no-picture.a21d576.jpeg" : urlPicture),
+                    fit: BoxFit.fitWidth
+                ),
               ),
-              initialValue: urlPicture,
-              onChanged : (String value){
-                setState((){
-                  urlPicture = value;
-                });
-              }
 
+            ),
+            onTap: (){
+              pickImage();
+            },
           ),
+          SizedBox(height: 10,),
           Row(
             mainAxisAlignment:  MainAxisAlignment.center,
             children: <Widget>[
@@ -194,11 +193,7 @@ class dashboardState extends State<dashBoard>{
                 child:
                   ElevatedButton(
                       onPressed : () {
-                        if(isEditing == false){
-                          newAnnounce();
-                        }else{
-                          editAnnounce();
-                        }
+                        newAnnounce();
                       },
                       style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.symmetric(horizontal: 20)
@@ -250,68 +245,63 @@ class dashboardState extends State<dashBoard>{
     });
   }
 
-  getAnnouncesByUser(){
-    FirestoreAnnounceHelper().getStreamAnnouncesByUser().then((result) => {
+  getAllAnnounces(){
+    FirestoreAnnounceHelper().getStreamAllAnnounce().then((result) => {
       setState((){
         listAnnoucesByUser = result;
-      })
-    });
-  }
-  editAnnounce(){
-    Map<String,dynamic> map = {
-      "TITRE": titre,
-      "CONTENU" : contenu,
-      "URLPICTURE" : urlPicture,
-      "USERID" : GlobalUser.id,
-    };
-    FirestoreAnnounceHelper().updateAnnounce(idAnnounce, map).then((result) => {
-      setState(() {
-        state = "list";
-        titre = "";
-        contenu = "";
-        urlPicture = "";
-      })
-    });
-  }
-  deleteAnnounce(){
-    FirestoreAnnounceHelper().deleteAnnounce(idAnnounce).then((result) => {
-      setState((){
-        state = "list";
+        print(result);
       })
     });
   }
 
-  Future<void> _showMyDialog() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Êtes vous sur de supprimer cette annonce ?'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: const <Widget>[
-                Text('This is a demo alert dialog.'),
+  //Choisir l'image
+  Future pickImage() async{
+    FilePickerResult? resultat = await FilePicker.platform.pickFiles(
+        withData: true,
+        type: FileType.image
+    );
+    if (resultat != null){
+      nomImage = resultat.files.first.name;
+      bytesImage = resultat.files.first.bytes;
+      MyPopUp();
+
+    }
+
+  }
+
+  //Création de notre popUp
+  MyPopUp(){
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context){
+            return AlertDialog(
+              title: const Text("Mon image"),
+              content: Image.memory(bytesImage!),
+              actions: [
+                ElevatedButton(
+                  onPressed: (){
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Annuler"),
+                ),
+
+                ElevatedButton(
+                  onPressed: (){
+                    //Stocker et on va récupérer son url
+                    FirestoreAnnounceHelper().stockageImage(bytesImage!, nomImage!, idAnnounce).then((value){
+                      setState(() {
+                        urlPicture = value;
+                      });
+                      Navigator.pop(context);
+                    });
+                  },
+                  child: const Text("Enregistrement"),
+                ),
               ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Supprimer'),
-              onPressed: () {
-                deleteAnnounce();
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Annuler'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
+
+            );
+          }
     );
   }
 }
