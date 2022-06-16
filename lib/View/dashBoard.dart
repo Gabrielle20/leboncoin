@@ -102,7 +102,11 @@ class dashboardState extends State<dashBoard>{
                             child: IconButton(
                               icon: const Icon(Icons.favorite_border_rounded),
                               color: Colors.white,
-                              onPressed: () {createFav();},
+                              onPressed: () 
+                              {
+                                setState((){idAnnounce=announce["id"];});
+                                createFav();
+                              },
                             ),
                           ),
                         ],
@@ -224,7 +228,7 @@ class dashboardState extends State<dashBoard>{
   }
 
 createFav(){
-    FirestoreHelper().createFavoris("test").then((value) {
+    FirestoreHelper().createFavoris(idAnnounce).then((value) {
 
           Navigator.push(context, MaterialPageRoute(builder: (context) {
             return dashBoard();
@@ -260,7 +264,6 @@ createFav(){
     FirestoreAnnounceHelper().getStreamAllAnnounce().then((result) => {
       setState((){
         listAnnoucesByUser = result;
-        print(result);
       })
     });
   }
